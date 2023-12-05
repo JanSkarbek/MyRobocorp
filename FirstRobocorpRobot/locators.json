@@ -1,0 +1,30 @@
+{
+    "Btnwarning": {
+        "screenshot": ".images\\btnwarning-screenshot.png",
+        "source": "https://robotsparebinindustries.com/#/robot-order",
+        "strategy": "css",
+        "type": "browser",
+        "value": ".btn-warning"
+    },
+    "ButtoncontainsIguessso": {
+        "screenshot": ".images\\buttoncontainsiguessso-screenshot.png",
+        "source": "https://robotsparebinindustries.com/#/robot-order",
+        "strategy": "xpath",
+        "type": "browser",
+        "value": "//button[contains(.,'I guess so...')]"
+    },
+    "ButtoncontainsO": {
+        "screenshot": ".images\\buttoncontainso-screenshot.png",
+        "source": "https://robotsparebinindustries.com/#/robot-order",
+        "strategy": "xpath",
+        "type": "browser",
+        "value": "//button[contains(.,'OK')]"
+    },
+    "niedziala": {
+        "screenshot": ".images\\niedziala-screenshot.png",
+        "source": "https://robotsparebinindustries.com/#/robot-order",
+        "strategy": "css",
+        "type": "browser",
+        "value": ".btn-dark"
+    }
+}

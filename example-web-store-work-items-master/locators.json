@@ -1,0 +1,9 @@
+{
+    "Cssdatatestaddtocartsaucelabsbolttshirt1": {
+        "screenshot": null,
+        "source": "https://www.saucedemo.com/inventory.html",
+        "strategy": "css",
+        "type": "browser",
+        "value": "css=*[data-test=\"add-to-cart-sauce-labs-bolt-t-shirt\"]"
+    }
+}
