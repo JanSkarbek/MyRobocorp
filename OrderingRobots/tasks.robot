@@ -81,13 +81,28 @@ Fill the form
         Wait Until Element Is Visible    ${receipt}    
     END
 
-    ${pdf}=    Store the receipt as a PDF file    ${row}[0]    
+    ${pdf}=    Store the receipt as a PDF file    ${row}[0]
+    ${robotPrint} =     Take a screenshot of the robot    ${row}[0]
+    Embed the robot screenshot to the receipt PDF file    ${robotPrint}    ${pdf}
 
 Store the receipt as a PDF file
     [Arguments]    ${orderNo}
-    Html To Pdf    ${receipt}    ${OUTPUT_DIR}${/}${orderNo}
-    Return ${CURDIR}${/}${OUTPUT_DIR}${/}${orderNo}
+    ${pdfPath} =    Set Variable    ${OUTPUT_DIR}${/}${orderNo}.pdf
+    ${html} =    Get Element Attribute    ${receipt}    outerHTML
+    Html To Pdf    ${html}    ${pdfPath}
+    RETURN    ${pdfPath}
 
 Click Order
     Click Button    ${OrderBtn}
     Wait Until Element Is Visible    ${receipt}
+
+Take a screenshot of the robot
+    [Arguments]    ${orderNo}
+    ${pngPath} =     Set Variable    ${OUTPUT_DIR}${/}${orderNo}.png
+    Screenshot    ${RobotPreview}    ${pngPath}
+    RETURN    ${pngPath}
+
+Embed the robot screenshot to the receipt PDF file
+    [Arguments]  ${screenshotPath}    ${pdfPath}
+    ${files}=    Create List    ${screenshotPath}
+    Add Files To Pdf    ${files}    ${pdfPath}    ${False}
