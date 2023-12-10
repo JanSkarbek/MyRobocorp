@@ -99,16 +99,17 @@ Fill the form
     Click Button    css=.btn-dark
     Wait Until Element Is Visible    ${HeadList}
 
+Click Order
+    Click Button    ${OrderBtn}
+    Wait Until Element Is Visible    ${receipt}
+
 Store the receipt as a PDF file
     [Arguments]    ${orderNo}
-    ${pdfPath} =    Set Variable    ${OUTPUT_DIR}${/}PDFs${/}${orderNo}.pdf
+    ${pdfPath} =    Set Variable    ${OUTPUT_DIR}${/}${orderNo}.pdf
     ${html} =    Get Element Attribute    ${receipt}    outerHTML
     Html To Pdf    ${html}    ${pdfPath}
     RETURN    ${pdfPath}
 
-Click Order
-    Click Button    ${OrderBtn}
-    Wait Until Element Is Visible    ${receipt}
 
 Take a screenshot of the robot
     [Arguments]    ${orderNo}
@@ -123,4 +124,4 @@ Embed the robot screenshot to the receipt PDF file
 
 Zip all orders
     [Arguments]    ${listOfFiles}    ${zipPath}
-    Archive Folder With Zip    ${OUTPUT_DIR}${/}PDFs    ZippedOrders.zip
+    Archive Folder With Zip    ${OUTPUT_DIR}   ZippedOrders.zip
