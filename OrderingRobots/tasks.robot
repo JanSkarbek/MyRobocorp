@@ -9,6 +9,9 @@ Library    RPA.Browser.Selenium
 Library    RPA.Tables
 Library    RPA.HTTP
 Library    RPA.PDF
+Library    RPA.Archive
+Library    Collections
+#Library    RPA.JavaAccessBridge
 
 
 *** Variables ***
@@ -26,18 +29,24 @@ ${RobotPreview} =       //div[@id='robot-preview']
 ${PreviewBtn} =         //button[@id='preview']
 ${OrderBtn} =           //button[@id='order']
 ${receipt} =            //div[@id='receipt']
+${OrderAnother} =       order-another
+
 
 
 *** Tasks ***
 Order robots from RobotSpareBin Industries Inc
+    ${ordersPDF} =    Create List
     ${orders} =    Get orders
     Log   Found columns: ${orders.columns}
     Open the robot order website
-    Fill the form    ${orders}[0]
+    Fill the form    ${orders}[0]    ${ordersPDF}
+    Fill the form    ${orders}[2]    ${ordersPDF}
     #FOR    ${order}    IN    @{orders}
     #    Log    ${order}  
     #END
-    Sleep    2
+    Zip all orders    ${ordersPDF}    ${OUTPUT_DIR}${/}ZippedOrders.zip
+    Log Many    @{ordersPDF}
+    Log ${ordersPDF}
     Log    Done.
 
     
@@ -54,7 +63,7 @@ Get orders
     RETURN    ${temp_table}
 
 Fill the form
-    [Arguments]    ${row}
+    [Arguments]    ${row}    ${ordersPdfList}
     Select From List By Index    ${HeadList}    ${row}[1]
 
     ${BodyIndex} =    Set Variable    ${row}[2]
@@ -84,10 +93,15 @@ Fill the form
     ${pdf}=    Store the receipt as a PDF file    ${row}[0]
     ${robotPrint} =     Take a screenshot of the robot    ${row}[0]
     Embed the robot screenshot to the receipt PDF file    ${robotPrint}    ${pdf}
+    Append To List    ${ordersPdfList}    ${pdf}
+    Click Button   ${OrderAnother}
+    Wait Until Element Is Visible    css=.btn-dark
+    Click Button    css=.btn-dark
+    Wait Until Element Is Visible    ${HeadList}
 
 Store the receipt as a PDF file
     [Arguments]    ${orderNo}
-    ${pdfPath} =    Set Variable    ${OUTPUT_DIR}${/}${orderNo}.pdf
+    ${pdfPath} =    Set Variable    ${OUTPUT_DIR}${/}PDFs${/}${orderNo}.pdf
     ${html} =    Get Element Attribute    ${receipt}    outerHTML
     Html To Pdf    ${html}    ${pdfPath}
     RETURN    ${pdfPath}
@@ -104,5 +118,9 @@ Take a screenshot of the robot
 
 Embed the robot screenshot to the receipt PDF file
     [Arguments]  ${screenshotPath}    ${pdfPath}
-    ${files}=    Create List    ${screenshotPath}
-    Add Files To Pdf    ${files}    ${pdfPath}    ${False}
+    ${files} =    Create List    ${screenshotPath}
+    Add Files To Pdf    ${files}    ${pdfPath}    ${True}
+
+Zip all orders
+    [Arguments]    ${listOfFiles}    ${zipPath}
+    Archive Folder With Zip    ${OUTPUT_DIR}${/}PDFs    ZippedOrders.zip
