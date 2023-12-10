@@ -64,18 +64,18 @@ Get orders
 
 Fill the form
     [Arguments]    ${row}    ${ordersPdfList}
-    Select From List By Index    ${HeadList}    ${row}[1]
+    Select From List By Index    ${HeadList}    ${row}[Head]
 
-    ${BodyIndex} =    Set Variable    ${row}[2]
+    ${BodyIndex} =    Set Variable    ${row}[Body]
     ${BodyRadioBtn} =    Set Variable    //div[@class='stacked']/div[@class='radio form-check']/label/input[@id='id-body-${BodyIndex}']
     Set Focus To Element    ${BodyRadioBtn}
     Click Element    ${BodyRadioBtn}
 
-    ${LegIndex} =    Set Variable    ${row}[3]
+    ${LegIndex} =    Set Variable    ${row}[Legs]
     Set Focus To Element     ${LegFormCtrl}
     Input Text    ${LegFormCtrl}    ${LegIndex}
 
-    ${AddressIndex} =    Set Variable    ${row}[4]   
+    ${AddressIndex} =    Set Variable    ${row}[Address]   
     Input Text    ${AddressFormCtrl}    ${AddressIndex}
 
     Sleep    1
@@ -90,8 +90,8 @@ Fill the form
         Wait Until Element Is Visible    ${receipt}    
     END
 
-    ${pdf}=    Store the receipt as a PDF file    ${row}[0]
-    ${robotPrint} =     Take a screenshot of the robot    ${row}[0]
+    ${pdf}=    Store the receipt as a PDF file    ${row}[Order number]
+    ${robotPrint} =     Take a screenshot of the robot    ${row}[Order number]
     Embed the robot screenshot to the receipt PDF file    ${robotPrint}    ${pdf}
     Append To List    ${ordersPdfList}    ${pdf}
     Click Button   ${OrderAnother}
