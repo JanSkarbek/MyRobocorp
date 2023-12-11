@@ -11,7 +11,7 @@ Library    RPA.HTTP
 Library    RPA.PDF
 Library    RPA.Archive
 Library    Collections
-#Library    RPA.JavaAccessBridge
+Library    RPA.Robocorp.WorkItems
 
 
 *** Variables ***
@@ -34,19 +34,25 @@ ${OrderAnother} =       order-another
 
 
 *** Tasks ***
-Order robots from RobotSpareBin Industries Inc
-    ${ordersPDF} =    Create List
+Load Work Items
     ${orders} =    Get orders
-    Log   Found columns: ${orders.columns}
-    Open the robot order website
-    #Fill the form    ${orders}[0]    ${ordersPDF}
-    #Fill the form    ${orders}[2]    ${ordersPDF}
     FOR    ${order}    IN    @{orders}
-        Fill the form    ${order}    ${ordersPDF}
+        Create Output Work Item    ${order}    save=${True}
     END
-    Zip all orders    ${ordersPDF}    ${OUTPUT_DIR}${/}ZippedOrders.zip
-    Log Many    @{ordersPDF}
-    Log ${ordersPDF}
+
+Order robots from RobotSpareBin Industries Inc
+    Open the robot order website
+    TRY
+        For Each Input Work Item    Fill the form
+    EXCEPT    AS    ${err}
+        Log    ${err}    level=ERROR
+        Release input work item
+        ...    state=FAILED
+        ...    exception_type=APPLICATION
+        ...    code=UNCAUGHT_ERROR
+        ...    message=${err}
+    END
+    Zip all orders    ${OUTPUT_DIR}    ${OUTPUT_DIR}${/}ZippedOrders.zip
     Log    Done.
 
     
@@ -63,41 +69,51 @@ Get orders
     RETURN    ${temp_table}
 
 Fill the form
-    [Arguments]    ${row}    ${ordersPdfList}
-    Select From List By Index    ${HeadList}    ${row}[Head]
-
-    ${BodyIndex} =    Set Variable    ${row}[Body]
-    ${BodyRadioBtn} =    Set Variable    //div[@class='stacked']/div[@class='radio form-check']/label/input[@id='id-body-${BodyIndex}']
-    Set Focus To Element    ${BodyRadioBtn}
-    Click Element    ${BodyRadioBtn}
-
-    ${LegIndex} =    Set Variable    ${row}[Legs]
-    Set Focus To Element     ${LegFormCtrl}
-    Input Text    ${LegFormCtrl}    ${LegIndex}
-
-    ${AddressIndex} =    Set Variable    ${row}[Address]   
-    Input Text    ${AddressFormCtrl}    ${AddressIndex}
-
-    Sleep    1
-    Wait Until Keyword Succeeds    3x    1s    Click Button    ${PreviewBtn}
-    Wait Until Element Is Visible    ${RobotPreview}
-    
+    ${work_item}=    Get work item variables
     TRY
-        Wait Until Keyword Succeeds    3x    1s    Click Order
-    EXCEPT
-        Log    "Failed at finishing Order"
-    FINALLY
-        Wait Until Element Is Visible    ${receipt}    
-    END
+        IF    ${work_item}[Order number] == 7
+            Click Element    id:xxx  
+        END
+        Select From List By Index    ${HeadList}    ${work_item}[Head]
 
-    ${pdf}=    Store the receipt as a PDF file    ${row}[Order number]
-    ${robotPrint} =     Take a screenshot of the robot    ${row}[Order number]
+        ${BodyIndex} =    Set Variable    ${work_item}[Body]
+        ${BodyRadioBtn} =    Set Variable    //div[@class='stacked']/div[@class='radio form-check']/label/input[@id='id-body-${BodyIndex}']
+        Set Focus To Element    ${BodyRadioBtn}
+        Click Element    ${BodyRadioBtn}
+
+        ${LegIndex} =    Set Variable    ${work_item}[Legs]
+        Set Focus To Element     ${LegFormCtrl}
+        Input Text    ${LegFormCtrl}    ${LegIndex}
+
+        ${AddressIndex} =    Set Variable    ${work_item}[Address]   
+        Input Text    ${AddressFormCtrl}    ${AddressIndex}
+
+        Sleep    1
+        Wait Until Keyword Succeeds    3x    1s    Click Button    ${PreviewBtn}
+        Wait Until Element Is Visible    ${RobotPreview}
+    
+        TRY
+            Wait Until Keyword Succeeds    3x    1s    Click Order
+        EXCEPT
+            Log    "Failed at finishing Order"
+        FINALLY
+            Wait Until Element Is Visible    ${receipt}    
+        END
+
+    ${pdf}=    Store the receipt as a PDF file    ${work_item}[Order number]
+    ${robotPrint} =     Take a screenshot of the robot    ${work_item}[Order number]
     Embed the robot screenshot to the receipt PDF file    ${robotPrint}    ${pdf}
-    Append To List    ${ordersPdfList}    ${pdf}
+    #Append To List    ${ordersPdfList}    ${pdf}
     Click Button   ${OrderAnother}
     Wait Until Element Is Visible    css=.btn-dark
     Click Button    css=.btn-dark
     Wait Until Element Is Visible    ${HeadList}
+
+    EXCEPT
+        Close Browser
+        Sleep    1
+        Open the robot order website
+    END
 
 Click Order
     Click Button    ${OrderBtn}
@@ -124,4 +140,4 @@ Embed the robot screenshot to the receipt PDF file
 
 Zip all orders
     [Arguments]    ${listOfFiles}    ${zipPath}
-    Archive Folder With Zip    ${OUTPUT_DIR}   ZippedOrders.zip
+    Archive Folder With Zip    ${OUTPUT_DIR}   ZippedOrders.zip    include=*.pdf
