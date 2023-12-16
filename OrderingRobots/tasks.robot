@@ -34,12 +34,6 @@ ${OrderAnother} =       order-another
 
 
 *** Tasks ***
-Load Work Items
-    ${orders} =    Get orders
-    FOR    ${order}    IN    @{orders}
-        Create Output Work Item    ${order}    save=${True}
-    END
-
 Order robots from RobotSpareBin Industries Inc
     Open the robot order website
     TRY
@@ -62,11 +56,6 @@ Open the robot order website
     #Click Button    ${EntryOkBtn}
     Click Element    css=.btn-dark
     Sleep    2
-
-Get orders
-    Download    ${csv_URL}    overwrite=${True}
-    ${temp_table} =    Read table from CSV    orders.csv    header=${True}
-    RETURN    ${temp_table}
 
 Fill the form
     ${work_item}=    Get work item variables
@@ -108,8 +97,15 @@ Fill the form
     Wait Until Element Is Visible    css=.btn-dark
     Click Button    css=.btn-dark
     Wait Until Element Is Visible    ${HeadList}
+    Release Input Work Item    DONE
 
     EXCEPT
+        Log    GENERAL ERROR   level=ERROR
+        Release input work item
+        ...    state=FAILED
+        ...    exception_type=APPLICATION
+        ...    code=UNCAUGHT_ERROR
+        ...    message=GENERAL_ERROR
         Close Browser
         Sleep    1
         Open the robot order website
