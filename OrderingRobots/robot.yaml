@@ -3,8 +3,13 @@
 
 tasks:
   # Task names here are used when executing the bots, so renaming these is recommended.
-  Run all tasks:
-    shell: python -m robot --report NONE --outputdir output --logtitle "Task log" tasks.robot
+  #Run all tasks:
+  #  shell: python -m robot --report NONE --outputdir output --logtitle "Task log" tasks.robot
+  Load Work Items (Orders):
+    robotTaskName: Load Work Items - Orders
+  
+  Load and Process All Orders:
+    robotTaskName: Order robots from RobotSpareBin Industries Inc
 
 condaConfigFile: conda.yaml
 

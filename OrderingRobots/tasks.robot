@@ -12,6 +12,7 @@ Library    RPA.PDF
 Library    RPA.Archive
 Library    Collections
 Library    RPA.Robocorp.WorkItems
+Library    RPA.FileSystem
 
 
 *** Variables ***
@@ -34,7 +35,8 @@ ${OrderAnother} =       order-another
 
 
 *** Tasks ***
-Order robots from RobotSpareBin Industries Inc
+Order robots from RobotSpareBin Industries Inc    
+    Create directory     ${OUTPUT_DIR}${/}PDFs
     Open the robot order website
     TRY
         For Each Input Work Item    Fill the form
@@ -46,10 +48,10 @@ Order robots from RobotSpareBin Industries Inc
         ...    code=UNCAUGHT_ERROR
         ...    message=${err}
     END
-    Zip all orders    ${OUTPUT_DIR}    ${OUTPUT_DIR}${/}ZippedOrders.zip
+    Zip all orders    ${OUTPUT_DIR}${/}PDFs   ZippedOrders.zip
     Log    Done.
 
-    
+
 *** Keywords ***
 Open the robot order website
     Open Chrome Browser    ${ordering_page_URL}
@@ -89,8 +91,9 @@ Fill the form
             Wait Until Element Is Visible    ${receipt}    
         END
 
-    ${pdf}=    Store the receipt as a PDF file    ${work_item}[Order number]
+    
     ${robotPrint} =     Take a screenshot of the robot    ${work_item}[Order number]
+    ${pdf}=    Store the receipt as a PDF file    ${work_item}[Order number]
     Embed the robot screenshot to the receipt PDF file    ${robotPrint}    ${pdf}
     #Append To List    ${ordersPdfList}    ${pdf}
     Click Button   ${OrderAnother}
@@ -117,7 +120,7 @@ Click Order
 
 Store the receipt as a PDF file
     [Arguments]    ${orderNo}
-    ${pdfPath} =    Set Variable    ${OUTPUT_DIR}${/}${orderNo}.pdf
+    ${pdfPath} =    Set Variable    ${OUTPUT_DIR}${/}PDFs${/}${orderNo}.pdf
     ${html} =    Get Element Attribute    ${receipt}    outerHTML
     Html To Pdf    ${html}    ${pdfPath}
     RETURN    ${pdfPath}
@@ -135,5 +138,6 @@ Embed the robot screenshot to the receipt PDF file
     Add Files To Pdf    ${files}    ${pdfPath}    ${True}
 
 Zip all orders
-    [Arguments]    ${listOfFiles}    ${zipPath}
-    Archive Folder With Zip    ${OUTPUT_DIR}   ZippedOrders.zip    include=*.pdf
+    [Arguments]    ${FilesPath}    ${zipName}
+    Log    ${FilesPath} 
+    Archive Folder With Zip    ${FilesPath}    ${zipName}    include=*.pdf

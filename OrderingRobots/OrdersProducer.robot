@@ -14,10 +14,15 @@ ${csv_URL} =                https://robotsparebinindustries.com/orders.csv
 
 
 *** Tasks ***
-Load Work Items
-    ${orders} =    Get orders
-    FOR    ${order}    IN    @{orders}
-        Create Output Work Item    ${order}    save=${True}
+Load Work Items - Orders
+     ${test} =    Set Variable    0
+    IF    ${test} == 0
+        ${orders} =    Get orders
+        FOR    ${order}    IN    @{orders}
+            Create Output Work Item    ${order}    save=${True}
+        END
+    ELSE
+        Log    Nothing to do, just testing
     END
 
 *** Keywords ***
