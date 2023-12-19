@@ -81,14 +81,7 @@ Fill the form
     Sleep    1
     Wait Until Keyword Succeeds    3x    1s    Click Button    ${PreviewBtn}
     Wait Until Element Is Visible    ${RobotPreview}
-    
-    TRY
-        Wait Until Keyword Succeeds    3x    1s    Click Order
-    EXCEPT
-        Log    "Failed at finishing Order"
-    FINALLY
-        Wait Until Element Is Visible    ${receipt}    
-    END
+    Wait Until Keyword Succeeds    3x    1s    Click Order
 
     ${pdf}=    Store the receipt as a PDF file    ${row}[Order number]
     ${robotPrint} =     Take a screenshot of the robot    ${row}[Order number]
