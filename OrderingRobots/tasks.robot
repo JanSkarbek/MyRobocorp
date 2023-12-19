@@ -39,11 +39,11 @@ Order robots from RobotSpareBin Industries Inc
     ${orders} =    Get orders
     Log   Found columns: ${orders.columns}
     Open the robot order website
-    #Fill the form    ${orders}[0]    ${ordersPDF}
-    #Fill the form    ${orders}[2]    ${ordersPDF}
+
     FOR    ${order}    IN    @{orders}
         Fill the form    ${order}    ${ordersPDF}
     END
+    
     Zip all orders    ${ordersPDF}    ${OUTPUT_DIR}${/}ZippedOrders.zip
     Log Many    @{ordersPDF}
     Log ${ordersPDF}
