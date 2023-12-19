@@ -80,28 +80,31 @@ Fill the form
         Input Text    ${AddressFormCtrl}    ${AddressIndex}
 
         Sleep    1
-        Wait Until Keyword Succeeds    3x    1s    Click Button    ${PreviewBtn}
+        Wait Until Keyword Succeeds    2x    1s    Click Button    ${PreviewBtn}
         Wait Until Element Is Visible    ${RobotPreview}
     
-        TRY
-            Wait Until Keyword Succeeds    3x    1s    Click Order
-        EXCEPT
-            Log    "Failed at finishing Order"
-        FINALLY
-            Wait Until Element Is Visible    ${receipt}    
-        END
-
+        Wait Until Keyword Succeeds    3x    1s    Click Order
     
-    ${robotPrint} =     Take a screenshot of the robot    ${work_item}[Order number]
-    ${pdf}=    Store the receipt as a PDF file    ${work_item}[Order number]
-    Embed the robot screenshot to the receipt PDF file    ${robotPrint}    ${pdf}
-    #Append To List    ${ordersPdfList}    ${pdf}
-    Click Button   ${OrderAnother}
-    Wait Until Element Is Visible    css=.btn-dark
-    Click Button    css=.btn-dark
-    Wait Until Element Is Visible    ${HeadList}
-    Release Input Work Item    DONE
+        ${robotPrint} =     Take a screenshot of the robot    ${work_item}[Order number]
+        ${pdf}=    Store the receipt as a PDF file    ${work_item}[Order number]
+        Embed the robot screenshot to the receipt PDF file    ${robotPrint}    ${pdf}
+        #Append To List    ${ordersPdfList}    ${pdf}
+        Click Button   ${OrderAnother}
+        Wait Until Element Is Visible    css=.btn-dark
+        Click Button    css=.btn-dark
+        Wait Until Element Is Visible    ${HeadList}
+        Release Input Work Item    DONE
 
+    EXCEPT    *Element*receipt*not visible*    type=GLOB    AS    ${err}
+        Log    {err}    level=ERROR
+        Release input work item
+        ...    state=FAILED
+        ...    exception_type=APPLICATION
+        ...    code=ORDER_BTN_FAILED
+        ...    message=${err}
+        Close Browser
+        Sleep    1
+        Open the robot order website
     EXCEPT
         Log    GENERAL ERROR   level=ERROR
         Release input work item
